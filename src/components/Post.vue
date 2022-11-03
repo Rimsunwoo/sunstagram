@@ -11,7 +11,7 @@
       class="post-body"
       :style="{ backgroundImage: `url(${postData.postImage})` }"
     ></div>
-    1
+
     <div class="post-content">
       <p>{{ postData.likes }}</p>
       <p>
@@ -28,7 +28,7 @@ export default {
     return {};
   },
   props: {
-    postData: Array,
+    postData: Object,
   },
 };
 </script>

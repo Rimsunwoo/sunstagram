@@ -1,20 +1,27 @@
 <template>
   <div class="header">
     <ul class="header-button-left">
-      <li>Cancel</li>
+      <li @click="step = 0">Cancel</li>
     </ul>
     <ul class="header-button-right">
-      <li>Next</li>
+      <li v-if="step !== 2" @click="if (step == 1) step = 2;">Next</li>
+      <li v-if="step == 2" @click="clickUpload">Upload</li>
     </ul>
     <img src="./assets/logo.png" class="logo" />
   </div>
 
-  <Container :postData="postData" />
-  <button @click="more">더보기</button>
+  <Container
+    @upload="postStr = $event"
+    :imgUrl="imgUrl"
+    :step="step"
+    :postData="postData"
+    :choiceFilter="choiceFilter"
+  />
+  <button v-if="step == 0" @click="more">더보기</button>
 
   <div class="footer">
     <ul class="footer-button-plus">
-      <input type="file" id="file" class="inputfile" />
+      <input @change="fileUpload" type="file" id="file" class="inputfile" />
       <label for="file" class="input-plus">+</label>
     </ul>
   </div>
@@ -29,19 +36,49 @@ export default {
   data() {
     return {
       postData: data,
+      clickNum: 0,
+      imgUrl: "",
+      step: 0,
+      postStr: "",
+      choiceFilter: "",
     };
   },
   name: "App",
   components: {
     Container,
   },
+  mounted() {
+    this.emitter.on("filterChange", (a) => {
+      this.choiceFilter = a;
+    });
+  },
   methods: {
     more() {
       axios
-        .get("https://codingapple1.github.io/vue/more0.json")
-        .then(function (결과) {
-          console.log(결과);
+        .get(`https://codingapple1.github.io/vue/more${this.clickNum}.json`)
+        .then((결과) => {
+          this.postData.push(결과.data);
         });
+      this.clickNum = this.clickNum == "0" ? "1" : "0";
+    },
+    fileUpload(e) {
+      let file = e.target.files[0];
+      this.imgUrl = URL.createObjectURL(file);
+      this.step++;
+    },
+    clickUpload() {
+      let newPost = {
+        name: "Guest",
+        userImage: "https://placeimg.com/100/100/arch",
+        postImage: this.imgUrl,
+        likes: 0,
+        date: "May 15",
+        liked: false,
+        content: this.postStr,
+        filter: "perpetua",
+      };
+      this.postData.unshift(newPost);
+      this.step = 0;
     },
   },
 };
